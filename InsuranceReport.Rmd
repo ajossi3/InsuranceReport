@@ -1,0 +1,76 @@
+---
+title: "Insurance Cost Report"
+author: "ANDREW JOSSI"
+date: "Due October 22, 2023"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+library(tinytex)
+library(leaps)
+library(ISLR2)
+library(glmnet)
+
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(out.width = "60%")
+```
+
+```{r}
+medical <- read_csv("medical_cost.csv")
+summary(medical)
+```
+#Breakdown of each column in the dataset
+Age (years): age of primary beneficiary  
+Sex (male or female): Insurance contractor gender  
+Bmi (lb/in^2): Body mass index, $weight/(height)^2$  
+children (#0-5): number of children covered by health insurance  
+Smoker (yes or no): smoking status of primary beneficiary  
+Region (northeast, southeast, southwest, northwest): beneficiary's residential are in the U.S.  
+Charges ($): individual medial costs billed by health insurance.  
+
+
+```{r}
+glimpse(medical)
+```
+```{r}
+#change categorical to binary
+medical <- medical %>%
+  mutate(male = ifelse(sex=="male",1,0)) %>%
+  mutate(smokes = ifelse(medical$smoker=="yes",1,0))
+```
+
+
+#Distribution of Charges
+```{r}
+ggplot(data = medical, aes(x = charges)) + 
+  geom_density(alpha = 0.5) + 
+  ggtitle("Distribution of Charges")
+```
+The distribution of charges appears to be right skewed with a slight fluctuation around the $40,000 mark.  
+
+#Boxplot of predictors vs. charges
+
+```{r}
+for (col in c('sex', 'region', 'children', 'smoker')) {
+   plot <- ggplot(data = medical,
+                 aes_string(x = col, y = 'charges', group = col, fill = col)) + 
+            geom_boxplot(show.legend = FALSE) + 
+            ggtitle(glue::glue("Boxplot of Medical Charges per {col}"))
+  print(plot)
+}
+```
+Based on the box plots, we can see that sex and region do not have noticeable correlations with insurance charges as the mean charges are about the same despite the category. However, as the amount of children increase, insurance charges increase revealing a positive correlation. The strongest correlation between predictor and response is seen in smoker status. Those who smoke incur dramatically higher insurance charges than those who do not. 
+
+
+
+
+
+
+
+
+
